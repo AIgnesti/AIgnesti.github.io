@@ -1,6 +1,5 @@
 @import url("fontawesome-all.min.css");
 @import url("https://fonts.googleapis.com/css?family=Lato:400,400italic,700,700italic|Source+Code+Pro:400");
-
 /*
 	Read Only by HTML5 UP
 	html5up.net | @ajlkn
@@ -85,7 +84,7 @@ input, select, textarea {
 	}
 
 	body {
-		background: #062abd;
+		background: #0572f0;
 	}
 
 		body.is-preload *, body.is-preload *:before, body.is-preload *:after {
@@ -136,7 +135,7 @@ input, select, textarea {
 	}
 
 	h1, h2, h3, h4, h5, h6 {
-		color: #062abd;
+		color: #0572f0;
 		font-weight: 700;
 		line-height: 1em;
 		margin: 0 0 0.5625em 0;
@@ -160,7 +159,7 @@ input, select, textarea {
 
 	h4 {
 		font-size: 1.25em;
-		line-height: 1.5em;
+		line-height: 1.1em;
 	}
 
 	h5 {
@@ -1761,7 +1760,7 @@ input, select, textarea {
 	}
 
 	header p {
-		color: #3400ad;
+		color: #0572f0;
 		position: relative;
 		margin: 0 0 1.6875em 0;
 	}
@@ -1787,12 +1786,12 @@ input, select, textarea {
 	}
 
 	header.major h2 {
-		color: #3400ad;
+		color: #0572f0;
 		font-size: 3.5em;
 	}
 
 		header.major h2 + p {
-			color: #777;
+			color: #0572f0;
 			font-size: 1.75em;
 			font-weight: 700;
 			margin-top: -0.75em;
