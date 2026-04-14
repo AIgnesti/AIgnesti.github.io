@@ -19,12 +19,32 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install Browser Dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgbm-dev libnss3 libasound2 wget unzip
+          # These specific libraries are required to prevent Exit Code 100
+          sudo apt-get install -y \
+            libgbm-dev \
+            libnss3 \
+            libasound2 \
+            libxshmfence1 \
+            libglu1 \
+            libxcomposite1 \
+            libxcursor1 \
+            libxdamage1 \
+            libxi6 \
+            libxtst6 \
+            libpangocairo-1.0-0 \
+            libpango-1.0-0 \
+            libatk1.0-0 \
+            libcairo-gobject2 \
+            libcairo2 \
+            libgdk-pixbuf2.0-0 \
+            libglib2.0-0 \
+            libgtk-3-0
+          
           pip install requests-html
-          # This downloads the actual browser engine
+          # Downloads the browser
           python -m pyppeteer-install 
 
       - name: Run scraper
