@@ -44,7 +44,8 @@ def fetch_ads_metrics():
         # 1. Total Citations (Checking two possible keys)
         total_citations = cit_stats.get('total_number_of_citations')
         if total_citations is None:
-            total_citations = cit_stats.get('number_of_citations', 0)
+            #total_citations = cit_stats.get('number_of_citations', 0)
+            total_citations = cit_stats.get('total number of citations', 0)
 
         # 2. Cited Records (Checking two possible keys)
         cited_records = cit_stats.get('number_of_cited_papers')
