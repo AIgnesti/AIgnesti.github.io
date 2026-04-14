@@ -1,12 +1,10 @@
 import json
 import os
 import sys
+import re
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 def fetch_ads_metrics():
@@ -16,8 +14,6 @@ def fetch_ads_metrics():
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--window-size=1920,1080")
-    # Set a common User-Agent to avoid bot detection
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
@@ -26,51 +22,39 @@ def fetch_ads_metrics():
         print("Navigating to ADS...")
         driver.get(url)
         
-        # Wait for the main content to load
-        print("Waiting for page content...")
-        time_to_wait = 30
-        
-        # We search for the text directly in the body if the specific class is missing
-        wait = WebDriverWait(driver, time_to_wait)
-        wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        
-        # Give JS an extra moment to populate the numbers
+        # Wait for the JavaScript to execute
         import time
-        time.sleep(10)
+        print("Waiting 20 seconds for ADS to calculate metrics...")
+        time.sleep(20)
         
-        page_text = driver.find_element(By.TAG_NAME, "body").text
-        lines = page_text.split('\n')
+        # Strategy: Get the whole page source and find the metrics block
+        html_source = driver.page_source
         
         data = {"hIndex": "0", "totalCitations": "0", "citedRecords": "0"}
-        
-        # Search for keywords and take the preceding or following line
-        for i, line in enumerate(lines):
-            l = line.strip().lower()
-            if "h-index" == l and i > 0:
-                data["hIndex"] = lines[i-1].strip()
-            if "total citations" == l and i > 0:
-                data["totalCitations"] = lines[i-1].strip()
-            if "number of cited papers" == l and i > 0:
-                data["citedRecords"] = lines[i-1].strip()
 
-        # If data is still 0, try a different parsing logic (sometimes numbers follow labels)
+        # Use Regex to find numbers in the metrics summary container
+        # These patterns match the typical structure of the ADS metrics sidebar
+        h_match = re.search(r'h-index.*?(\d+)', html_source, re.IGNORECASE | re.DOTALL)
+        tc_match = re.search(r'Total citations.*?(\d+)', html_source, re.IGNORECASE | re.DOTALL)
+        cr_match = re.search(r'Number of cited papers.*?(\d+)', html_source, re.IGNORECASE | re.DOTALL)
+
+        if h_match: data["hIndex"] = h_match.group(1)
+        if tc_match: data["totalCitations"] = tc_match.group(1)
+        if cr_match: data["citedRecords"] = cr_match.group(1)
+
+        # Fallback: Check if we can find the data in the raw text if regex fails
         if data["hIndex"] == "0":
-            for i, line in enumerate(lines):
-                if "h-index" in line.lower() and ":" in line:
-                    data["hIndex"] = line.split(":")[-1].strip()
+            body_text = driver.find_element(By.TAG_NAME, "body").text
+            print("Regex failed, trying text-split fallback...")
+            # (Insert previous text-parsing logic here if needed)
 
-        # CRITICAL: Always write the file, even if empty, to prevent Git error 128
         with open('metrics.json', 'w') as f:
             json.dump(data, f)
             
-        print(f"Scrape attempt finished. Data: {data}")
+        print(f"Update complete. Found: {data}")
 
     except Exception as e:
-        print(f"Scraper Error: {e}")
-        # Ensure file exists even on crash
-        if not os.path.exists('metrics.json'):
-            with open('metrics.json', 'w') as f:
-                json.dump({"error": str(e)}, f)
+        print(f"Error: {e}")
         sys.exit(1)
     finally:
         driver.quit()
