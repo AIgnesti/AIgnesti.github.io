@@ -19,17 +19,8 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install Dependencies and Chrome
-        run: |
-          sudo apt-get update
-          # Install the specific libraries needed for Chrome
-          sudo apt-get install -y libgbm-dev libnss3 libasound2t64
-          
-          # Install Python tools
-          pip install requests-html pyppeteer
-          
-          # Use the direct path to install the browser to avoid "No module named" error
-          python -m pyppeteer.command_install
+      - name: Install Selenium
+        run: pip install selenium webdriver-manager
 
       - name: Run scraper
         run: python update_metrics.py
