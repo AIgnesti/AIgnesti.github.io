@@ -112,8 +112,9 @@
 							<section id="three">
 								<div class="container">
 									<h3>Research</h3>
-									<div id="ads-box" style="padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
-									  <p>Total Citations: <span id="citations">Loading...</span></p>
+									<div id="ads-box" style="padding: 8px; border: 1px solid #0080FF; border-radius: 5px;">
+									 <p>Referred Papers: <span id="paper">Loading...</span></p>
+										<p>Total Citations: <span id="citations">Loading...</span></p>
 									  <p>h-index: <span id="hindex">Loading...</span></p>
 									</div>
 									
@@ -124,6 +125,7 @@
 									    .then(data => {
 									      document.getElementById('citations').textContent = data.totalCitations;
 									      document.getElementById('hindex').textContent = data.hIndex;
+										  document.getElementById('paper').textConent=data.last_updated_count;
 									    })
 									    .catch(err => {
 									      console.error("Could not load metrics", err);
