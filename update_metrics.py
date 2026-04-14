@@ -35,31 +35,45 @@ def fetch_ads_metrics():
         m_res.raise_for_status()
         m_data = m_res.json()
 
-        # The Metrics API returns several blocks: 'basic stats', 'citation stats', etc.
-        # We extract from 'indicators' and 'citation stats'
-        basic = m_data.get('basic stats', {})
-        citations = m_data.get('citation stats', {})
+        # Extract stats blocks
+        cit_stats = m_data.get('citation stats', {})
         indicators = m_data.get('indicators', {})
 
-        # Use .get() to avoid KeyErrors if ADS changes a field name
+        # --- REFINED EXTRACTION LOGIC ---
+        
+        # 1. Total Citations (Checking two possible keys)
+        total_citations = cit_stats.get('total_number_of_citations')
+        if total_citations is None:
+            total_citations = cit_stats.get('number_of_citations', 0)
+
+        # 2. Cited Records (Checking two possible keys)
+        cited_records = cit_stats.get('number_of_cited_papers')
+        if cited_records is None:
+            # Fallback to 'number_of_papers' in citation stats if specific 'cited' key is missing
+            cited_records = cit_stats.get('number_of_papers', 0)
+
+        # 3. h-index
+        h_index = indicators.get('h', 0)
+
         output = {
-            "hIndex": indicators.get('h', 0),
-            "totalCitations": citations.get('total_number_of_citations', 0),
-            "citedRecords": citations.get('number_of_cited_papers', 0),
-            "paperCount": len(bibcodes)
+            "hIndex": h_index,
+            "totalCitations": total_citations,
+            "citedRecords": cited_records,
+            "last_updated_count": len(bibcodes)
         }
 
         # Write to file
         with open('metrics.json', 'w') as f:
             json.dump(output, f, indent=2)
         
-        print(f"Success! metrics.json updated: {output}")
+        print(f"Success! Data found: {output}")
 
     except Exception as e:
         print(f"API Error: {e}")
-        # Log the response body for debugging if it's a JSON error
+        # This will print the full JSON if it fails, so you can see the keys in GitHub logs
         if 'm_res' in locals():
-            print("Response Keys found:", m_res.json().keys())
+            print("Full API Response for debugging:")
+            print(json.dumps(m_res.json(), indent=2))
         sys.exit(1)
 
 if __name__ == "__main__":
