@@ -19,23 +19,18 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install Selenium
-        run: pip install selenium webdriver-manager
+      - name: Install Requests
+        run: pip install requests
 
-      - name: Run scraper
+      - name: Run API Scraper
+        env:
+          ADS_TOKEN: ${{ secrets.ADS_TOKEN }} # This pulls from your GitHub Secrets
         run: python update_metrics.py
 
-      
       - name: Commit and push if changed
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          # Check if file exists before adding
-          if [ -f metrics.json ]; then
-            git add metrics.json
-            git commit -m "Update ADS metrics" || echo "No changes to commit"
-            git push || echo "No changes to push"
-          else
-            echo "Error: metrics.json was not created by the scraper."
-            exit 1
-          fi
+          git add metrics.json
+          git commit -m "Update ADS metrics via API" || echo "No changes"
+          git push || echo "No changes"
