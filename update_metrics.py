@@ -14,12 +14,11 @@ def fetch_ads_metrics():
         
         # CRITICAL: Added browser arguments for GitHub Actions environment
         print("Rendering JavaScript (this may take a moment)...")
-        r.html.render(
-            sleep=15, 
-            keep_page=True, 
-            # These flags prevent the 'Exit Code 1' browser crash
-            args=['--no-sandbox', '--disable-setuid-sandbox']
-        )
+       r.html.render(
+                sleep=15, 
+                keep_page=True, 
+                args=['--no-sandbox', '--disable-setuid-sandbox','--disable-dev-shm-usage','--disable-gpu']
+)
         
         # Find the metrics summary block
         # ADS usually renders this in a div with class 'metrics-summary'
