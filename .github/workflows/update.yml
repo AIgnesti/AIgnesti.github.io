@@ -4,9 +4,8 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
-# Fixes the Node.js 24 requirement mentioned in your error
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+# We remove the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 env var 
+# because v5/v6 actions are native to the newer Node environments.
 
 permissions:
   contents: write
@@ -15,15 +14,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Updated from v3 to v4
+      # Use v4 (latest stable) or check if v5 is available for your runner
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # Updated from v3 to v4
+      # Upgrade to v5, which supports Node 20/24 smoothly
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.9'
+          cache: 'pip' # Optional: speeds up subsequent runs
 
       - name: Install Browser Dependencies
         run: |
