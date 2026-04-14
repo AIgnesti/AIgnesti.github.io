@@ -19,16 +19,17 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install System Dependencies
+      - name: Install Dependencies and Chrome
         run: |
           sudo apt-get update
-          # Use playwright's built-in tool to install ALL browser libs automatically
-          pip install playwright
-          sudo npx playwright install-deps
+          # Install the specific libraries needed for Chrome
+          sudo apt-get install -y libgbm-dev libnss3 libasound2t64
           
-          # Now install your actual scraping tools
-          pip install requests-html
-          python -m pyppeteer-install 
+          # Install Python tools
+          pip install requests-html pyppeteer
+          
+          # Use the direct path to install the browser to avoid "No module named" error
+          python -m pyppeteer.command_install
 
       - name: Run scraper
         run: python update_metrics.py
