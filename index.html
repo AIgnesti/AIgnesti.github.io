@@ -125,7 +125,7 @@
 									    .then(data => {
 									      document.getElementById('citations').textContent = data.totalCitations;
 									      document.getElementById('hindex').textContent = data.hIndex;
-										  document.getElementById('paper').textConent=data.last_updated_count;
+										  document.getElementById('paper').textContent=data.last_updated_count;
 									    })
 									    .catch(err => {
 									      console.error("Could not load metrics", err);
