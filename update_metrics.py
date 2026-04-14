@@ -2,9 +2,11 @@ import json
 import os
 import sys
 import re
+import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By  # <--- Added this missing import
 from webdriver_manager.chrome import ChromeDriverManager
 
 def fetch_ads_metrics():
@@ -14,6 +16,7 @@ def fetch_ads_metrics():
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
@@ -22,39 +25,41 @@ def fetch_ads_metrics():
         print("Navigating to ADS...")
         driver.get(url)
         
-        # Wait for the JavaScript to execute
-        import time
-        print("Waiting 20 seconds for ADS to calculate metrics...")
-        time.sleep(20)
+        print("Waiting 25 seconds for ADS JavaScript and Metrics to settle...")
+        time.sleep(25)
         
-        # Strategy: Get the whole page source and find the metrics block
-        html_source = driver.page_source
+        # Get the body text - this is usually where the rendered metrics end up
+        body_element = driver.find_element(By.TAG_NAME, "body")
+        page_text = body_element.text
         
         data = {"hIndex": "0", "totalCitations": "0", "citedRecords": "0"}
+        
+        # Split by lines and look for the labels
+        lines = [l.strip() for l in page_text.split('\n') if l.strip()]
+        
+        for i, line in enumerate(lines):
+            low = line.lower()
+            # ADS structure: The number is often the line IMMEDIATELY PRECEDING the label
+            if low == "h-index" and i > 0:
+                data["hIndex"] = lines[i-1]
+            if low == "total citations" and i > 0:
+                data["totalCitations"] = lines[i-1]
+            if low == "number of cited papers" and i > 0:
+                data["citedRecords"] = lines[i-1]
 
-        # Use Regex to find numbers in the metrics summary container
-        # These patterns match the typical structure of the ADS metrics sidebar
-        h_match = re.search(r'h-index.*?(\d+)', html_source, re.IGNORECASE | re.DOTALL)
-        tc_match = re.search(r'Total citations.*?(\d+)', html_source, re.IGNORECASE | re.DOTALL)
-        cr_match = re.search(r'Number of cited papers.*?(\d+)', html_source, re.IGNORECASE | re.DOTALL)
+        # Debug print so you can see what it found in the GitHub logs
+        print(f"Extraction result: {data}")
 
-        if h_match: data["hIndex"] = h_match.group(1)
-        if tc_match: data["totalCitations"] = tc_match.group(1)
-        if cr_match: data["citedRecords"] = cr_match.group(1)
-
-        # Fallback: Check if we can find the data in the raw text if regex fails
-        if data["hIndex"] == "0":
-            body_text = driver.find_element(By.TAG_NAME, "body").text
-            print("Regex failed, trying text-split fallback...")
-            # (Insert previous text-parsing logic here if needed)
-
+        # Always save the file
         with open('metrics.json', 'w') as f:
             json.dump(data, f)
             
-        print(f"Update complete. Found: {data}")
-
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Scraper encountered an error: {e}")
+        # Save a dummy file so Git doesn't crash
+        if not os.path.exists('metrics.json'):
+            with open('metrics.json', 'w') as f:
+                json.dump({"hIndex": "Error", "totalCitations": "Error", "citedRecords": "Error"}, f)
         sys.exit(1)
     finally:
         driver.quit()
