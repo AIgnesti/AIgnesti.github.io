@@ -17,8 +17,7 @@ def fetch_ads_metrics():
        r.html.render(
                 sleep=15, 
                 keep_page=True, 
-                args=['--no-sandbox', '--disable-setuid-sandbox','--disable-dev-shm-usage','--disable-gpu']
-)
+                args=['--no-sandbox', '--disable-setuid-sandbox','--disable-dev-shm-usage','--disable-gpu'])
         
         # Find the metrics summary block
         # ADS usually renders this in a div with class 'metrics-summary'
