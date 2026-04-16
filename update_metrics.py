@@ -48,10 +48,10 @@ def fetch_ads_metrics():
             total_citations = cit_stats.get('total number of citations', 0)
 
         # 2. Cited Records (Checking two possible keys)
-        cited_records = cit_stats.get('number_of_cited_papers')
+        cited_records = cit_stats.get('refereed publications')
         if cited_records is None:
             # Fallback to 'number_of_papers' in citation stats if specific 'cited' key is missing
-            cited_records = cit_stats.get('number_of_papers', 0)
+            cited_records = cit_stats.get('refereed publications', 0)
 
         # 3. h-index
         h_index = indicators.get('h', 0)
