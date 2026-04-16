@@ -9,7 +9,7 @@ def fetch_ads_metrics():
         print("Error: ADS_TOKEN not found in environment.")
         sys.exit(1)
 
-    query = 'pubdate:[2017-01 TO 9999-12] author:("ignesti,a.")'
+    query = 'pubdate:[2017-01 TO 9999-12] author:("ignesti,a.")property:"refereed"'
     headers = {'Authorization': f'Bearer {token}'}
     
     try:
